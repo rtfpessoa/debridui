@@ -16,6 +16,7 @@ import {
 } from "@/lib/types";
 import BaseClient from "./base";
 import { USER_AGENT } from "../constants";
+import { getProxyUrl } from "@/lib/utils";
 import Fuse from "fuse.js";
 
 // Response type definitions
@@ -104,7 +105,7 @@ export default class AllDebridClient extends BaseClient {
     private async makeRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
         await this.rateLimiter.acquire();
         const { apiKey } = this.user;
-        const url = `https://api.alldebrid.com/v4.1/${path}?agent=${USER_AGENT}`;
+        const url = getProxyUrl(`https://api.alldebrid.com/v4.1/${path}?agent=${USER_AGENT}`);
 
         const response = await fetch(url, {
             ...options,
@@ -124,7 +125,7 @@ export default class AllDebridClient extends BaseClient {
     }
 
     static async getUser(apiKey: string): Promise<User> {
-        const url = `https://api.alldebrid.com/v4.1/user?agent=${USER_AGENT}`;
+        const url = getProxyUrl(`https://api.alldebrid.com/v4.1/user?agent=${USER_AGENT}`);
 
         const response = await fetch(url, {
             headers: { Authorization: `Bearer ${apiKey}` },
@@ -155,7 +156,7 @@ export default class AllDebridClient extends BaseClient {
         check: string;
         redirect_url: string;
     }> {
-        const url = `https://api.alldebrid.com/v4.1/pin/get?agent=${USER_AGENT}`;
+        const url = getProxyUrl(`https://api.alldebrid.com/v4.1/pin/get?agent=${USER_AGENT}`);
         const response = await fetch(url);
         const data = await response.json();
 
@@ -178,7 +179,7 @@ export default class AllDebridClient extends BaseClient {
         formData.append("check", check);
 
         const startTime = Date.now();
-        const url = `https://api.alldebrid.com/v4.1/pin/check?agent=${USER_AGENT}`;
+        const url = getProxyUrl(`https://api.alldebrid.com/v4.1/pin/check?agent=${USER_AGENT}`);
 
         while (Date.now() - startTime < timeoutMs) {
             const response = await fetch(url, {
