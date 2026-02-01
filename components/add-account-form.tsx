@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ import { handleError } from "@/lib/utils/error-handling";
 import { formatAccountType } from "@/lib/utils";
 
 export function AddAccountForm() {
+    const router = useRouter();
     const addAccount = useAddUserAccount();
     const [isLoadingOAuth, setIsLoadingOAuth] = useState<"alldebrid" | "torbox" | "realdebrid" | "premiumize" | null>(null);
 
