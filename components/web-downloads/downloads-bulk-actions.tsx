@@ -81,11 +81,7 @@ export function DownloadsBulkActions({ selectedDownloads, onClearSelection }: Do
             for (const download of readyDownloads) {
                 try {
                     const link = await getDownloadLink(download);
-                    const a = document.createElement("a");
-                    a.href = link;
-                    a.download = download.name;
-                    a.target = "_blank";
-                    a.click();
+                    window.open(link, "_blank");
                     count++;
                     // Small delay between downloads to prevent browser blocking
                     if (count < readyDownloads.length) {

@@ -63,11 +63,7 @@ export const DownloadItem = memo(function DownloadItem({
     const handleDownload = async () => {
         const link = await getLink("download");
         if (link) {
-            const a = document.createElement("a");
-            a.href = link;
-            a.download = download.name;
-            a.target = "_blank";
-            a.click();
+            window.open(link, "_blank");
         }
     };
 
