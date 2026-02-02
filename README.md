@@ -110,17 +110,6 @@ bun run build
 NODE_ENV=production node .next/standalone/server.js
 ```
 
-## CORS Proxy
-
-Addons require a CORS proxy to function. Deploy `proxy.worker.js` to Cloudflare Workers:
-
-1. Create a [Cloudflare Workers](https://workers.cloudflare.com) account
-2. Click "Create Application" → "Create Worker"
-3. Replace worker code with contents of `proxy.worker.js`
-4. Update `ALLOWED_ORIGINS` array with your domain(s)
-5. Deploy and copy the worker URL
-6. Add to `.env.local`: `NEXT_PUBLIC_CORS_PROXY_URL=https://your.worker.workers.dev?url=`
-
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request.

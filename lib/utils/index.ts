@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 import { AccountType } from "../schemas";
 import { formatDistanceToNow, differenceInYears } from "date-fns";
 import { DebridLinkInfo, FileType } from "../types";
-import { ACCOUNT_TYPE_LABELS, CORS_PROXY_URL, EXTENSION_TO_FILE_TYPE } from "../constants";
+import { ACCOUNT_TYPE_LABELS, EXTENSION_TO_FILE_TYPE } from "../constants";
 import { del } from "idb-keyval";
 import { queryClient } from "../query-client";
 import { toast } from "sonner";
@@ -209,6 +209,6 @@ export const getProxyUrl = (url: string): string => {
     if (url.startsWith("https://api.alldebrid.com/v4.1/")) {
         return url.replace("https://api.alldebrid.com/v4.1/", "/api/proxy/alldebrid/");
     }
-    // Fallback: external CORS proxy for arbitrary URLs (CDN downloads)
-    return `${CORS_PROXY_URL}${encodeURIComponent(url)}`;
+    // Fallback: use local proxy for arbitrary URLs (CDN downloads)
+    return `/api/proxy/external?url=${encodeURIComponent(url)}`;
 };

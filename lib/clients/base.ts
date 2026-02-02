@@ -142,8 +142,11 @@ export default abstract class BaseClient {
         if (directLinks.length > 0) {
             const resolvedLinks = await Promise.all(directLinks.map(resolveRedirects));
             const webResults = await this.addWebDownloads(resolvedLinks);
-            for (const result of webResults) {
-                results[result.link] = {
+            // Key by original URI, not resolved link
+            for (let i = 0; i < webResults.length; i++) {
+                const result = webResults[i];
+                const originalUri = directLinks[i];
+                results[originalUri] = {
                     id: result.id,
                     success: result.success,
                     message: result.success ? result.name || "Added successfully" : result.error || "Failed",

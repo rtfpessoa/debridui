@@ -16,10 +16,12 @@ async function proxyRequest(request: NextRequest, params: Promise<{ path: string
     const targetUrl = `${PREMIUMIZE_API_BASE}/${pathStr}${url.search}`;
 
     const authHeader: Record<string, string> = {};
-    if (apiKey.includes("Bearer")) {
+    if (apiKey.startsWith("Bearer ")) {
         authHeader["Authorization"] = apiKey;
     } else {
-        authHeader["Cookie"] = `sdk_login=${apiKey}; cookieNoticeSeen=1`;
+        // Sanitize apiKey to prevent cookie/header injection
+        const sanitizedKey = apiKey.replace(/[;\r\n]/g, "");
+        authHeader["Cookie"] = `sdk_login=${sanitizedKey}; cookieNoticeSeen=1`;
     }
 
     const headers: HeadersInit = {

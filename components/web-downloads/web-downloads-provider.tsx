@@ -49,8 +49,13 @@ export function WebDownloadsProvider({ children }: { children: ReactNode }) {
         if (!client.supportsEphemeralLinks) return apiDownloads;
         // Only show ephemeral links on first page
         if (currentPage !== 1) return apiDownloads;
-        const apiDownloadLinks = new Set(apiDownloads.map((d) => d.downloadLink));
-        return [...ephemeralLinks.filter((d) => !apiDownloadLinks.has(d.downloadLink)), ...apiDownloads];
+        const apiOriginalLinks = new Set(
+            apiDownloads.map((d) => d.originalLink).filter((link): link is string => !!link)
+        );
+        return [
+            ...ephemeralLinks.filter((d) => !d.originalLink || !apiOriginalLinks.has(d.originalLink)),
+            ...apiDownloads,
+        ];
     }, [client.supportsEphemeralLinks, ephemeralLinks, listQuery.data, currentPage]);
 
     // Calculate total pages (same pattern as useFileExplorer)
@@ -78,7 +83,12 @@ export function WebDownloadsProvider({ children }: { children: ReactNode }) {
         mutationFn: async (links: string[]) => {
             // Resolve redirects before sending to debrid API
             const resolvedLinks = await Promise.all(links.map(resolveRedirects));
-            return client.addWebDownloads(resolvedLinks);
+            const results = await client.addWebDownloads(resolvedLinks);
+            // Return results with original link mapping
+            return results.map((result, index) => ({
+                ...result,
+                _originalInput: links[index],
+            }));
         },
         onSuccess: (results) => {
             if (client.supportsEphemeralLinks) {
@@ -89,7 +99,7 @@ export function WebDownloadsProvider({ children }: { children: ReactNode }) {
                         newLinks.push({
                             id: crypto.randomUUID(),
                             name: r.name || r.link.split("/").pop() || r.link,
-                            originalLink: r.link,
+                            originalLink: r._originalInput, // Use original input URL
                             downloadLink: r.downloadLink,
                             size: r.size,
                             status: "completed" as const,

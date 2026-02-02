@@ -157,7 +157,7 @@ const OAUTH_CLIENT_ID = "964471616";
 
 export default class PremiumizeClient extends BaseClient {
     readonly refreshInterval: number | false = false;
-    readonly supportsEphemeralLinks: boolean = true;
+    readonly supportsEphemeralLinks: boolean = false;
 
     constructor(user: User) {
         super({ user });
@@ -601,18 +601,22 @@ export default class PremiumizeClient extends BaseClient {
                     magnet,
                     status: {
                         id: response.id,
+                        success: true,
                         message: response.name ? `Added: ${response.name}` : "Torrent added successfully",
                         is_cached: response.type === "cached",
-                    } as DebridFileAddStatus,
+                    },
                 };
             } catch (error) {
                 return {
                     magnet,
                     status: {
-                        message: "Failed to add torrent",
-                        error: error instanceof Error ? error.message : "Unknown error",
+                        success: false,
+                        message:
+                            error instanceof Error
+                                ? `Failed to add torrent ${magnet}: ${error}`
+                                : `Failed to add torrent ${magnet}`,
                         is_cached: false,
-                    } as DebridFileAddStatus,
+                    },
                 };
             }
         });
@@ -626,8 +630,10 @@ export default class PremiumizeClient extends BaseClient {
                     acc[magnet] = result.value.status;
                 } else {
                     acc[magnet] = {
-                        message: "Failed to add torrent",
-                        error: result.reason?.message || "Unknown error",
+                        success: false,
+                        message:
+                            `Failed to add torrent ${magnet}: ${result.reason?.message}` ||
+                            `Failed to add torrent ${magnet}`,
                         is_cached: false,
                     };
                 }
@@ -660,10 +666,10 @@ export default class PremiumizeClient extends BaseClient {
                 return {
                     fileName: file.name,
                     status: {
-                        message: "Failed to add torrent",
-                        error: error instanceof Error ? error.message : "Unknown error",
+                        success: false,
+                        message: `Failed to add torrent ${file.name}: ${error}` || `Failed to add torrent ${file.name}`,
                         is_cached: false,
-                    } as DebridFileAddStatus,
+                    },
                 };
             }
         });
@@ -677,8 +683,10 @@ export default class PremiumizeClient extends BaseClient {
                     acc[file.name] = result.value.status;
                 } else {
                     acc[file.name] = {
-                        message: "Failed to add torrent",
-                        error: result.reason?.message || "Unknown error",
+                        success: false,
+                        message:
+                            `Failed to add torrent ${file.name}: ${result.reason?.message}` ||
+                            `Failed to add torrent ${file.name}`,
                         is_cached: false,
                     };
                 }
@@ -820,7 +828,7 @@ export default class PremiumizeClient extends BaseClient {
                     name: item.name,
                     size: undefined,
                     type: "folder",
-                    children: [], // Children would need separate API call
+                    children: [], // Premiumize API requires separate /folder/list call per folder
                 };
             }
 
@@ -891,9 +899,7 @@ export default class PremiumizeClient extends BaseClient {
         if (finishedWithFileId.length > 0) {
             const itemDetailsPromises = finishedWithFileId.map(async (t) => {
                 try {
-                    const itemResponse = await this.makeRequest<PremiumizeItemDetails>(
-                        `/item/details?id=${t.file_id}`
-                    );
+                    const itemResponse = await this.makeRequest<PremiumizeItemDetails>(`/item/details?id=${t.file_id}`);
                     if (itemResponse.link) {
                         downloadLinks.set(t.id, itemResponse.link);
                     }
